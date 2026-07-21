@@ -2,10 +2,17 @@
 
 import { useEffect, useState } from "react";
 import { StockItem } from "@/types";
-import { deleteItem, getItems, upsertItem } from "@/lib/storage";
+import {
+  createItem,
+  deleteItem,
+  getItems,
+  migrateLocalItemsIfNeeded,
+  updateItem,
+} from "@/lib/storage";
 import SummaryBanner from "@/components/SummaryBanner";
 import ItemList from "@/components/ItemList";
 import ItemForm from "@/components/ItemForm";
+import EmailSubscribe from "@/components/EmailSubscribe";
 
 export default function Home() {
   const [items, setItems] = useState<StockItem[]>([]);
@@ -14,11 +21,13 @@ export default function Home() {
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    // localStorage isn't available during SSR, so the initial items list
-    // must be hydrated from the client-only effect rather than useState.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setItems(getItems());
-    setLoaded(true);
+    async function init() {
+      await migrateLocalItemsIfNeeded();
+      const loadedItems = await getItems();
+      setItems(loadedItems);
+      setLoaded(true);
+    }
+    init();
   }, []);
 
   function handleAddClick() {
@@ -31,15 +40,23 @@ export default function Home() {
     setShowForm(true);
   }
 
-  function handleSubmit(item: StockItem) {
-    setItems(upsertItem(items, item));
+  async function handleSubmit(item: StockItem) {
+    const { id, ...rest } = item;
+    if (editing) {
+      const updated = await updateItem(id, rest);
+      setItems((prev) => prev.map((i) => (i.id === updated.id ? updated : i)));
+    } else {
+      const created = await createItem(rest);
+      setItems((prev) => [...prev, created]);
+    }
     setShowForm(false);
     setEditing(undefined);
   }
 
-  function handleDelete(id: string) {
+  async function handleDelete(id: string) {
     if (!window.confirm("この備蓄品を削除しますか？")) return;
-    setItems(deleteItem(items, id));
+    await deleteItem(id);
+    setItems((prev) => prev.filter((i) => i.id !== id));
   }
 
   function handleCancel() {
@@ -51,6 +68,7 @@ export default function Home() {
     <main className="mx-auto min-h-screen max-w-md space-y-4 p-4 pb-24">
       <h1 className="text-xl font-bold">🏠 備蓄管理</h1>
 
+      {loaded && <EmailSubscribe />}
       {loaded && <SummaryBanner items={items} />}
 
       {showForm ? (

@@ -68,6 +68,40 @@ export async function initSchema() {
     )
   `;
   await sql`create index if not exists items_user_id_idx on items(user_id)`;
+  await sql`
+    create table if not exists rate_limits (
+      key text primary key,
+      count integer not null default 1,
+      window_start timestamptz not null default now()
+    )
+  `;
+}
+
+// Sliding-window rate limiter backed by the same Postgres instance (no extra
+// infra needed at this scale). Returns true if the request is allowed.
+export async function checkRateLimit(
+  key: string,
+  limit: number,
+  windowMinutes: number
+): Promise<boolean> {
+  const rows = await sql`
+    insert into rate_limits (key, count, window_start)
+    values (${key}, 1, now())
+    on conflict (key) do update set
+      count = case
+        when rate_limits.window_start < now() - (${windowMinutes} || ' minutes')::interval
+        then 1
+        else rate_limits.count + 1
+      end,
+      window_start = case
+        when rate_limits.window_start < now() - (${windowMinutes} || ' minutes')::interval
+        then now()
+        else rate_limits.window_start
+      end
+    returning count
+  `;
+  const count = (rows[0] as { count: number }).count;
+  return count <= limit;
 }
 
 export async function getOrCreateUid(): Promise<string> {

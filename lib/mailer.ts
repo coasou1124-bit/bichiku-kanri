@@ -22,6 +22,18 @@ const buttonStyle =
   "display:inline-block;padding:12px 24px;background:#2563eb;color:#ffffff;" +
   "text-decoration:none;border-radius:8px;font-weight:bold;";
 
+// Item fields are user-supplied and get embedded in the outgoing HTML email;
+// escape them so a品名 like "<img onerror=...>" can't inject markup/tracking
+// pixels into the recipient's own notification email.
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 export async function sendVerificationEmail(email: string, token: string) {
   const transporter = getTransporter();
   const link = `${getAppUrl()}/api/verify?token=${token}`;
@@ -55,7 +67,10 @@ export async function sendDigestEmail(email: string, items: StockItem[]) {
       const urgency = getUrgency(item);
       const status =
         urgency.level === "overdue" ? "期限切れ" : `残り${urgency.daysLeft}日`;
-      return `<li>${item.name}（${status}／${item.category}・${item.location || "保管場所未設定"}）</li>`;
+      const name = escapeHtml(item.name);
+      const category = escapeHtml(item.category);
+      const location = escapeHtml(item.location || "保管場所未設定");
+      return `<li>${name}（${status}／${category}・${location}）</li>`;
     })
     .join("");
 

@@ -6,7 +6,15 @@ import { sendVerificationEmail } from "@/lib/mailer";
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function getClientIp(req: NextRequest): string {
-  return req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+  // x-forwarded-for can be seeded by the client itself (e.g. "1.2.3.4, <real ip>"),
+  // so a spoofed value would land first in the list. Vercel's edge always appends
+  // the true peer IP as the last hop, so prefer that over trusting entry [0].
+  const forwardedFor = req.headers.get("x-forwarded-for");
+  if (forwardedFor) {
+    const parts = forwardedFor.split(",").map((p) => p.trim());
+    return parts[parts.length - 1] || "unknown";
+  }
+  return req.headers.get("x-real-ip") || "unknown";
 }
 
 export async function POST(req: NextRequest) {

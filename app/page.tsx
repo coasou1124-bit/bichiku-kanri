@@ -13,6 +13,7 @@ import SummaryBanner from "@/components/SummaryBanner";
 import ItemList from "@/components/ItemList";
 import ItemForm from "@/components/ItemForm";
 import EmailSubscribe from "@/components/EmailSubscribe";
+import StockpileGuideLink from "@/components/StockpileGuideLink";
 
 export default function Home() {
   const [items, setItems] = useState<StockItem[]>([]);
@@ -70,6 +71,7 @@ export default function Home() {
 
       {loaded && <EmailSubscribe />}
       {loaded && <SummaryBanner items={items} />}
+      {loaded && <StockpileGuideLink />}
 
       {showForm ? (
         <ItemForm initial={editing} onSubmit={handleSubmit} onCancel={handleCancel} />

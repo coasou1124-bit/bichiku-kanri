@@ -5,7 +5,8 @@ export interface StockItem {
   id: string;
   name: string;
   category: string;
-  location: string;
+  bag: string; // どのカバン・容器に入っているか（例: 非常持ち出しリュックA）
+  location: string; // そのカバン・容器がどこに置いてあるか（例: 玄関収納）
   quantity: number;
   unit: string;
   expiryType: ExpiryType | null;
@@ -22,14 +23,19 @@ export const CATEGORY_PRESETS = [
   "その他",
 ] as const;
 
+export const BAG_PRESETS = [
+  "非常持ち出しリュックA",
+  "非常持ち出しリュックB",
+  "車載用バッグ",
+  "職場用",
+] as const;
+
 export const LOCATION_PRESETS = [
   "玄関収納",
   "リビング",
   "キッチン",
   "クローゼット",
   "車",
-  "非常持ち出しリュックA",
-  "非常持ち出しリュックB",
 ] as const;
 
 export const ALERT_LEAD_PRESETS: { label: string; days: number }[] = [

@@ -1,15 +1,11 @@
-interface LocationFilterProps {
-  locations: string[];
+interface BagFilterProps {
+  bags: string[];
   selected: string | null;
-  onSelect: (location: string | null) => void;
+  onSelect: (bag: string | null) => void;
 }
 
-export default function LocationFilter({
-  locations,
-  selected,
-  onSelect,
-}: LocationFilterProps) {
-  if (locations.length < 2) return null;
+export default function BagFilter({ bags, selected, onSelect }: BagFilterProps) {
+  if (bags.length < 2) return null;
 
   return (
     <div className="flex flex-wrap gap-2">
@@ -23,17 +19,17 @@ export default function LocationFilter({
       >
         すべて
       </button>
-      {locations.map((location) => (
+      {bags.map((bag) => (
         <button
-          key={location}
-          onClick={() => onSelect(location)}
+          key={bag}
+          onClick={() => onSelect(bag)}
           className={`rounded-full px-3 py-1 text-sm font-medium ${
-            selected === location
+            selected === bag
               ? "bg-blue-600 text-white"
               : "bg-black/5 text-black/60 dark:bg-white/10 dark:text-white/60"
           }`}
         >
-          {location}
+          🎒{bag}
         </button>
       ))}
     </div>

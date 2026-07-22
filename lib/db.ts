@@ -29,6 +29,7 @@ interface DbItemRow {
   user_id: string;
   name: string;
   category: string;
+  bag: string | null;
   location: string;
   quantity: string;
   unit: string;
@@ -72,6 +73,8 @@ export async function initSchema() {
   await sql`alter table items alter column expiry_date drop not null`;
   await sql`alter table items alter column expiry_type drop not null`;
   await sql`alter table items alter column alert_lead drop not null`;
+  // 「どのカバンに入っているか」を「保管場所（カバンの置き場所）」とは別に記録する
+  await sql`alter table items add column if not exists bag text`;
   await sql`
     create table if not exists rate_limits (
       key text primary key,
@@ -155,6 +158,7 @@ function rowToStockItem(row: DbItemRow): StockItem {
     id: row.id,
     name: row.name,
     category: row.category,
+    bag: row.bag ?? "",
     location: row.location,
     quantity: Number(row.quantity),
     unit: row.unit,
@@ -177,9 +181,9 @@ export async function createItem(
 ): Promise<StockItem> {
   const rows = await sql`
     insert into items
-      (user_id, name, category, location, quantity, unit, expiry_type, expiry_date, alert_lead)
+      (user_id, name, category, bag, location, quantity, unit, expiry_type, expiry_date, alert_lead)
     values
-      (${userId}, ${item.name}, ${item.category}, ${item.location}, ${item.quantity},
+      (${userId}, ${item.name}, ${item.category}, ${item.bag}, ${item.location}, ${item.quantity},
        ${item.unit}, ${item.expiryType}, ${item.expiryDate}, ${item.alertLead})
     returning *
   `;
@@ -193,7 +197,7 @@ export async function updateItem(
 ): Promise<StockItem | undefined> {
   const rows = await sql`
     update items set
-      name = ${item.name}, category = ${item.category}, location = ${item.location},
+      name = ${item.name}, category = ${item.category}, bag = ${item.bag}, location = ${item.location},
       quantity = ${item.quantity}, unit = ${item.unit}, expiry_type = ${item.expiryType},
       expiry_date = ${item.expiryDate}, alert_lead = ${item.alertLead}, last_notified_at = null
     where id = ${id} and user_id = ${userId}

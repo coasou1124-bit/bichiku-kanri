@@ -56,7 +56,8 @@ export default function ItemList({ items, onEdit, onDelete }: ItemListProps) {
               <div>
                 <p className="font-bold">{item.name}</p>
                 <p className="text-sm text-black/60 dark:text-white/60">
-                  {item.category} ・ {item.location || "保管場所未設定"}
+                  {item.category} ・ 🎒{item.bag || "カバン未設定"} ・ 📍
+                  {item.location || "保管場所未設定"}
                 </p>
                 <p className="mt-1 text-sm">
                   {item.quantity}

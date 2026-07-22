@@ -14,14 +14,14 @@ import ItemList from "@/components/ItemList";
 import ItemForm from "@/components/ItemForm";
 import EmailSubscribe from "@/components/EmailSubscribe";
 import StockpileGuideLink from "@/components/StockpileGuideLink";
-import LocationFilter from "@/components/LocationFilter";
+import BagFilter from "@/components/BagFilter";
 
 export default function Home() {
   const [items, setItems] = useState<StockItem[]>([]);
   const [editing, setEditing] = useState<StockItem | undefined>(undefined);
   const [showForm, setShowForm] = useState(false);
   const [loaded, setLoaded] = useState(false);
-  const [locationFilter, setLocationFilter] = useState<string | null>(null);
+  const [bagFilter, setBagFilter] = useState<string | null>(null);
 
   useEffect(() => {
     async function init() {
@@ -67,10 +67,8 @@ export default function Home() {
     setEditing(undefined);
   }
 
-  const locations = [...new Set(items.map((i) => i.location).filter(Boolean))].sort();
-  const visibleItems = locationFilter
-    ? items.filter((i) => i.location === locationFilter)
-    : items;
+  const bags = [...new Set(items.map((i) => i.bag).filter(Boolean))].sort();
+  const visibleItems = bagFilter ? items.filter((i) => i.bag === bagFilter) : items;
 
   return (
     <main className="mx-auto min-h-screen max-w-md space-y-4 p-4 pb-24">
@@ -92,11 +90,7 @@ export default function Home() {
       )}
 
       {loaded && (
-        <LocationFilter
-          locations={locations}
-          selected={locationFilter}
-          onSelect={setLocationFilter}
-        />
+        <BagFilter bags={bags} selected={bagFilter} onSelect={setBagFilter} />
       )}
 
       {loaded ? (

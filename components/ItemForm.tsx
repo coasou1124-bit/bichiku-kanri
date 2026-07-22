@@ -3,6 +3,7 @@
 import { useState } from "react";
 import {
   ALERT_LEAD_PRESETS,
+  BAG_PRESETS,
   CATEGORY_PRESETS,
   ExpiryType,
   LOCATION_PRESETS,
@@ -23,6 +24,7 @@ function emptyItem(): StockItem {
     id: crypto.randomUUID(),
     name: "",
     category: CATEGORY_PRESETS[0],
+    bag: "",
     location: "",
     quantity: 1,
     unit: "個",
@@ -85,30 +87,46 @@ export default function ItemForm({ initial, onSubmit, onCancel }: ItemFormProps)
         />
       </div>
 
+      <div>
+        <label className="mb-1 block text-sm font-medium">カテゴリ</label>
+        <input
+          list="category-list"
+          value={form.category}
+          onChange={(e) => handleChange("category", e.target.value)}
+          className="w-full rounded-lg border border-black/15 px-3 py-2 dark:border-white/20 dark:bg-transparent"
+        />
+        <datalist id="category-list">
+          {CATEGORY_PRESETS.map((c) => (
+            <option key={c} value={c} />
+          ))}
+        </datalist>
+      </div>
+
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="mb-1 block text-sm font-medium">カテゴリ</label>
+          <label className="mb-1 block text-sm font-medium">カバン</label>
           <input
-            list="category-list"
-            value={form.category}
-            onChange={(e) => handleChange("category", e.target.value)}
+            list="bag-list"
+            value={form.bag}
+            onChange={(e) => handleChange("bag", e.target.value)}
             className="w-full rounded-lg border border-black/15 px-3 py-2 dark:border-white/20 dark:bg-transparent"
+            placeholder="例：非常持ち出しリュックA"
           />
-          <datalist id="category-list">
-            {CATEGORY_PRESETS.map((c) => (
-              <option key={c} value={c} />
+          <datalist id="bag-list">
+            {BAG_PRESETS.map((b) => (
+              <option key={b} value={b} />
             ))}
           </datalist>
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium">保管場所（カバン名としても利用可）</label>
+          <label className="mb-1 block text-sm font-medium">保管場所（カバンの置き場所）</label>
           <input
             list="location-list"
             value={form.location}
             onChange={(e) => handleChange("location", e.target.value)}
             className="w-full rounded-lg border border-black/15 px-3 py-2 dark:border-white/20 dark:bg-transparent"
-            placeholder="例：非常持ち出しリュックA"
+            placeholder="例：玄関収納"
           />
           <datalist id="location-list">
             {LOCATION_PRESETS.map((l) => (

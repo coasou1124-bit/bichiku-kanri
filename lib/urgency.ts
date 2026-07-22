@@ -1,6 +1,6 @@
 import { StockItem } from "@/types";
 
-export type UrgencyLevel = "overdue" | "danger" | "warning" | "ok";
+export type UrgencyLevel = "overdue" | "danger" | "warning" | "ok" | "none";
 
 export interface UrgencyInfo {
   level: UrgencyLevel;
@@ -26,6 +26,10 @@ export function getDaysLeft(expiryDate: string): number {
 }
 
 export function getUrgency(item: StockItem): UrgencyInfo {
+  if (!item.expiryDate || item.alertLead == null) {
+    return { level: "none", daysLeft: Infinity, label: "期限なし" };
+  }
+
   const daysLeft = getDaysLeft(item.expiryDate);
   const { alertLead } = item;
 
@@ -42,7 +46,10 @@ export function getUrgency(item: StockItem): UrgencyInfo {
 }
 
 export function sortByUrgency(items: StockItem[]): StockItem[] {
-  return [...items].sort(
-    (a, b) => getDaysLeft(a.expiryDate) - getDaysLeft(b.expiryDate)
-  );
+  return [...items].sort((a, b) => {
+    if (!a.expiryDate && !b.expiryDate) return a.name.localeCompare(b.name);
+    if (!a.expiryDate) return 1;
+    if (!b.expiryDate) return -1;
+    return getDaysLeft(a.expiryDate) - getDaysLeft(b.expiryDate);
+  });
 }

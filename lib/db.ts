@@ -32,9 +32,9 @@ interface DbItemRow {
   location: string;
   quantity: string;
   unit: string;
-  expiry_type: string;
-  expiry_date: string;
-  alert_lead: number;
+  expiry_type: string | null;
+  expiry_date: string | null;
+  alert_lead: number | null;
   last_notified_at: string | null;
 }
 
@@ -68,6 +68,10 @@ export async function initSchema() {
     )
   `;
   await sql`create index if not exists items_user_id_idx on items(user_id)`;
+  // 懐中電灯など「期限のない」品目を許可するため、既存のNOT NULL制約を解除する
+  await sql`alter table items alter column expiry_date drop not null`;
+  await sql`alter table items alter column expiry_type drop not null`;
+  await sql`alter table items alter column alert_lead drop not null`;
   await sql`
     create table if not exists rate_limits (
       key text primary key,
@@ -156,7 +160,7 @@ function rowToStockItem(row: DbItemRow): StockItem {
     unit: row.unit,
     expiryType: row.expiry_type as StockItem["expiryType"],
     expiryDate: row.expiry_date,
-    alertLead: row.alert_lead,
+    alertLead: row.alert_lead === null ? null : Number(row.alert_lead),
   };
 }
 

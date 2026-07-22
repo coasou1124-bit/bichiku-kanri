@@ -14,12 +14,14 @@ import ItemList from "@/components/ItemList";
 import ItemForm from "@/components/ItemForm";
 import EmailSubscribe from "@/components/EmailSubscribe";
 import StockpileGuideLink from "@/components/StockpileGuideLink";
+import LocationFilter from "@/components/LocationFilter";
 
 export default function Home() {
   const [items, setItems] = useState<StockItem[]>([]);
   const [editing, setEditing] = useState<StockItem | undefined>(undefined);
   const [showForm, setShowForm] = useState(false);
   const [loaded, setLoaded] = useState(false);
+  const [locationFilter, setLocationFilter] = useState<string | null>(null);
 
   useEffect(() => {
     async function init() {
@@ -65,6 +67,11 @@ export default function Home() {
     setEditing(undefined);
   }
 
+  const locations = [...new Set(items.map((i) => i.location).filter(Boolean))].sort();
+  const visibleItems = locationFilter
+    ? items.filter((i) => i.location === locationFilter)
+    : items;
+
   return (
     <main className="mx-auto min-h-screen max-w-md space-y-4 p-4 pb-24">
       <h1 className="text-xl font-bold">🏠 備蓄管理</h1>
@@ -84,8 +91,16 @@ export default function Home() {
         </button>
       )}
 
+      {loaded && (
+        <LocationFilter
+          locations={locations}
+          selected={locationFilter}
+          onSelect={setLocationFilter}
+        />
+      )}
+
       {loaded ? (
-        <ItemList items={items} onEdit={handleEdit} onDelete={handleDelete} />
+        <ItemList items={visibleItems} onEdit={handleEdit} onDelete={handleDelete} />
       ) : (
         <p className="py-8 text-center text-sm text-black/50 dark:text-white/50">
           読み込み中...

@@ -9,7 +9,7 @@ export async function PUT(
   const uid = await getOrCreateUid();
   const body = (await req.json()) as NewItemInput;
 
-  if (!body.name?.trim() || !body.expiryDate) {
+  if (!body.name?.trim()) {
     return NextResponse.json({ error: "invalid item" }, { status: 400 });
   }
 

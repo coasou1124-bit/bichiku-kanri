@@ -8,9 +8,9 @@ export interface StockItem {
   location: string;
   quantity: number;
   unit: string;
-  expiryType: ExpiryType;
-  expiryDate: string; // ISO date (YYYY-MM-DD)
-  alertLead: AlertLead;
+  expiryType: ExpiryType | null;
+  expiryDate: string | null; // ISO date (YYYY-MM-DD), null = 期限なし
+  alertLead: AlertLead | null;
 }
 
 export const CATEGORY_PRESETS = [
@@ -28,6 +28,8 @@ export const LOCATION_PRESETS = [
   "キッチン",
   "クローゼット",
   "車",
+  "非常持ち出しリュックA",
+  "非常持ち出しリュックB",
 ] as const;
 
 export const ALERT_LEAD_PRESETS: { label: string; days: number }[] = [

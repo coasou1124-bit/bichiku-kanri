@@ -12,6 +12,7 @@ const LEVEL_STYLES: Record<string, string> = {
   danger: "border-red-300 bg-red-50 dark:border-red-800 dark:bg-red-950",
   warning: "border-yellow-300 bg-yellow-50 dark:border-yellow-700 dark:bg-yellow-950",
   ok: "border-black/10 bg-white dark:border-white/10 dark:bg-black/20",
+  none: "border-black/10 bg-white dark:border-white/10 dark:bg-black/20",
 };
 
 const BADGE_STYLES: Record<string, string> = {
@@ -19,6 +20,7 @@ const BADGE_STYLES: Record<string, string> = {
   danger: "bg-red-600 text-white",
   warning: "bg-yellow-500 text-black",
   ok: "bg-black/10 text-black/60 dark:bg-white/10 dark:text-white/60",
+  none: "bg-black/10 text-black/50 dark:bg-white/10 dark:text-white/50",
 };
 
 export default function ItemList({ items, onEdit, onDelete }: ItemListProps) {
@@ -37,11 +39,13 @@ export default function ItemList({ items, onEdit, onDelete }: ItemListProps) {
       {sorted.map((item) => {
         const urgency = getUrgency(item);
         const badgeText =
-          urgency.level === "overdue"
-            ? "期限切れ"
-            : urgency.level === "ok"
-              ? `残り${urgency.daysLeft}日`
-              : `${urgency.label}（残り${urgency.daysLeft}日）`;
+          urgency.level === "none"
+            ? "期限なし"
+            : urgency.level === "overdue"
+              ? "期限切れ"
+              : urgency.level === "ok"
+                ? `残り${urgency.daysLeft}日`
+                : `${urgency.label}（残り${urgency.daysLeft}日）`;
 
         return (
           <li
@@ -56,9 +60,14 @@ export default function ItemList({ items, onEdit, onDelete }: ItemListProps) {
                 </p>
                 <p className="mt-1 text-sm">
                   {item.quantity}
-                  {item.unit} ・{" "}
-                  {item.expiryType === "best_before" ? "賞味期限" : "消費期限"}:{" "}
-                  {item.expiryDate}
+                  {item.unit}
+                  {item.expiryDate && (
+                    <>
+                      {" "}
+                      ・ {item.expiryType === "best_before" ? "賞味期限" : "消費期限"}:{" "}
+                      {item.expiryDate}
+                    </>
+                  )}
                 </p>
               </div>
               <span
